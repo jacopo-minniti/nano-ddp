@@ -53,9 +53,9 @@ Application code is in `src/` and tests are in `tests/`. The Python package is `
 
 Model constructors are registered in `src/models/__init__.py`; each registered constructor accepts `num_layers`. Dataset factories are registered in `src/data.py` and receive the data directory and a download flag. A dataset must support indexing and return `(input_tensor, class_label)` samples. Add a constructor or factory to its registry to make it selectable with `--model` or `--dataset`.
 
-The current training loop expects a classification model and uses cross-entropy loss. A language model or another training task will also need its own batching and loss logic. New checkpoints record the model, dataset, layer count, worker count and batch size to detect incompatible resumes; older checkpoints do not contain this metadata.
+The current training loop expects a classification model and uses cross-entropy loss. A language model or another training task will also need its own batching and loss logic. Checkpoints record the model, dataset, layer count, worker count and batch size to detect incompatible resumes.
 
-`distributed.py` holds the shared trainer interface and helpers. `dp/` contains the working centralized trainer; `ddp/` holds the future decentralized trainer and the `AllReduce` interface. `RingAllReduce`, `NanoDDP`, and `NanoGPT2` are unimplemented placeholders that raise `NotImplementedError`. The current centralized trainer does not use them.
+`distributed.py` holds the shared trainer interface and helpers. `dp/` contains the working centralized trainer: `trainer.py` supervises the group, `processes.py` implements the coordinator and workers, and `faults.py` injects demo failures; `ddp/` holds the future decentralized trainer and the `AllReduce` interface. `RingAllReduce`, `NanoDDP`, and `NanoGPT2` are unimplemented placeholders that raise `NotImplementedError`. The current centralized trainer does not use them.
 
 ## SGD momentum and memory
 

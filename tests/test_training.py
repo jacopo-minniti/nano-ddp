@@ -166,3 +166,17 @@ def test_parallel_trainers_share_the_same_entry_point():
     assert issubclass(NanoDDP, ParallelTrainer)
     with pytest.raises(TypeError):
         ParallelTrainer(None)
+
+
+def test_resume_requires_checkpoint_metadata_and_optimizer(tmp_path):
+    import pytest
+
+    model = build_model("mlp", torch.device("cpu"))
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+    path = tmp_path / "checkpoint.pt"
+    save_checkpoint(path, model, 1)
+
+    with pytest.raises(ValueError, match="configuration"):
+        load_checkpoint(path, model, expected_metadata={"dataset": "mnist"})
+    with pytest.raises(ValueError, match="no optimizer state"):
+        load_checkpoint(path, model, optimizer=optimizer)

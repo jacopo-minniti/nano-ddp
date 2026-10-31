@@ -39,19 +39,17 @@ def save_checkpoint(path, model, step, optimizer=None, metadata=None):
 
 def load_checkpoint(path, model, optimizer=None, expected_metadata=None):
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-    metadata = checkpoint.get("metadata")
-    if metadata is not None and expected_metadata is not None and metadata != expected_metadata:
+    metadata = checkpoint["metadata"]
+    if expected_metadata is not None and metadata != expected_metadata:
         raise ValueError(f"checkpoint training configuration does not match this run: {metadata}")
     model.load_state_dict(checkpoint["model"])
     if optimizer is not None:
-        state = checkpoint.get("optimizer")
+        state = checkpoint["optimizer"]
         if state is None:
-            if optimizer.param_groups[0]["momentum"] != 0 and checkpoint["step"] > 0:
-                raise ValueError("checkpoint has no optimizer state; cannot resume with momentum")
-        else:
-            saved = state["param_groups"][0]
-            current = optimizer.param_groups[0]
-            if any(saved[key] != current[key] for key in ("lr", "momentum")):
-                raise ValueError("checkpoint learning rate or momentum does not match this run")
-            optimizer.load_state_dict(state)
+            raise ValueError("checkpoint has no optimizer state")
+        saved = state["param_groups"][0]
+        current = optimizer.param_groups[0]
+        if any(saved[key] != current[key] for key in ("lr", "momentum")):
+            raise ValueError("checkpoint learning rate or momentum does not match this run")
+        optimizer.load_state_dict(state)
     return checkpoint["step"]
