@@ -1,0 +1,30 @@
+[project]
+name = "nano-ddp"
+version = "0.1.0"
+description = "A small fault-tolerant data-parallel training experiment"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "rich>=15.0.0",
+    "torch",
+    "torchvision",
+]
+
+[project.scripts]
+nano-ddp = "src.cli:main"
+
+[dependency-groups]
+dev = ["pytest"]
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "src"
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["e2e: runs MNIST training in multiple processes"]
